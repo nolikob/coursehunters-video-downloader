@@ -6,8 +6,15 @@ import schoolSVG from '../../assets/img/urlTeaching.svg';
 import studyImage from '../../assets/img/urlStudy.svg';
 import * as version from '../../config/version';
 
-const UrlScreen = memo(props => {
+const electron = window.require('electron');
+const session = electron.remote.session;
+
+const UrlScreen = memo((props) => {
   const [error, setError] = useState('');
+  const [username, setUsername] = useState(
+    '9y204vxicbragl3sum7hzfeo@kocovi.cz'
+  );
+  const [password, setPassword] = useState('@PTnjTMM*Vq5dSLQ');
   const [isError, setIsError] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isAnimation, setIsAnimation] = useState(false);
@@ -31,7 +38,17 @@ const UrlScreen = memo(props => {
     setTimeout(() => setIsLoading(true), 1000);
     setTimeout(async () => {
       try {
-        const data = await video.getVideos(url);
+        let data;
+        if (username && password) {
+          data = await video.getVIPVideos(
+            url,
+            username,
+            password,
+            session.defaultSession.cookies
+          );
+        } else {
+          data = await video.getVideos(url);
+        }
         props.setData(data);
         props.history.push('/download');
       } catch (err) {
@@ -53,7 +70,24 @@ const UrlScreen = memo(props => {
         setUrl={setUrl}
         url={url}
       />
-
+      <S.Row>
+        <span
+          style={{ width: '100%', textAlign: 'center', marginBottom: '1rem' }}
+        >
+          For VIP courses
+        </span>
+        <S.FormInput
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          placeholder={'Email'}
+        />
+        <S.FormInput
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          placeholder={'Password'}
+          type={'password'}
+        />
+      </S.Row>
       {isError && <S.ErrorMessage>{error}</S.ErrorMessage>}
       <S.SchoolImage src={schoolSVG} />
       <S.StudyImage src={studyImage} />
